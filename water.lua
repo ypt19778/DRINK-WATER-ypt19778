@@ -3,8 +3,8 @@ waters = {}
 water = {}
 water.__index = water
 
-local rows = 9
-local inRows = 5
+local rows = 14
+local inRows = 10
 
 local spawngrid = {}
 
@@ -31,7 +31,7 @@ function water.new(tag, x, y, width, height)
          instance.physics.fixture:setUserData(instance)
 
          instance.animation = {
-                  frameSpeed = 10,
+                  frameSpeed = 5,
                   currentFrame = 1,
                   spriteSheet = love.graphics.newImage('assets/sprites/water-anim.png'),
                   frames = {}
@@ -61,7 +61,7 @@ function water:startSpawn(rate)
                   new_water = water.new("water"..amount, spawngrid[dice].x, spawngrid[dice].y, 38, 40)
                   table.insert(waters, new_water)
 
-                  print(new_water.tag)
+                  print(new_water.tag.."  ".."x : "..new_water.x..", y : "..new_water.y)
                   timer = 0
          end
 end
@@ -77,12 +77,11 @@ function water:update(dt)
          if self.animation.currentFrame >= 4 then
                   self.animation.currentFrame = 1
          end
-         print(self.animation.currentFrame)
 end
 
 function water:draw()
          love.graphics.setColor(1, 1, 1, self.alpha)
          love.graphics.draw(self.animation.spriteSheet, self.animation.frames[math.floor(self.animation.currentFrame)], self.x, self.y, nil, 3)
-         love.graphics.polygon('line', self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
+         --love.graphics.polygon('line', self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
          love.graphics.setColor(1, 1, 1)
 end
