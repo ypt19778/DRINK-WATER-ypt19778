@@ -28,13 +28,13 @@ local spawn_amount_cur = 1
 function cactus:spawnMaze()
          local grid = {
                   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
-                  {1, 0, 2, 0, 0, 1, 0, 2, 0, 0, 0, 2, 0, 1},
+                  {1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1},
                   {1, 1, 1, 1, 0, 0, 0, 1, 1, 0, 1, 1, 1, 1},
                   {1, 0, 0, 1, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1},
-                  {1, 2, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1},
-                  {1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 2, 1},
-                  {1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 2, 1, 1, 1},
-                  {1, 2, 0, 0, 0, 1, 1, 2, 0, 0, 0, 0, 0, 1},
+                  {1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 0, 1, 1, 1},
+                  {1, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 0, 0, 1},
+                  {1, 1, 0, 1, 1, 1, 1, 1, 1, 1, 0, 1, 1, 1},
+                  {1, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1},
                   {1, 0, 1, 1, 0, 0, 1, 1, 0, 0, 1, 1, 0, 1},
                   {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
          }
@@ -44,11 +44,8 @@ function cactus:spawnMaze()
                                     if tile == 1 then
                                              new_cactus = cactus.new('cactus', 50 * j, 50 * i, 45, 45, world)
                                              table.insert(cacti, new_cactus)
-                                    elseif tile == 2 then
-                                             new_water = water.new('water', 50 * j, 50 * i, 45, 45, world)
-                                             table.insert(waters, new_water)
                                     elseif tile == 3 then
-                                             print('campfire')
+                                             print('fire located here')
                                     end
                            end
                   end
@@ -63,21 +60,40 @@ local spawngrid = {}
 
 local amount = 0
 local maxAmount = 4 
-function cactus:spawnRand()-- set as the amount of cacti needed
 
+local function checkCacti(chkX, chkY)
+         for i, v in ipairs(cacti) do
+                  if chkX == v.x and chkY == v.y then
+                           print('replacing cacti...')
+                           return false
+                  end
+         end
+
+         print('successfully spawned new cactus.')
+         return true
+end
+
+function cactus:spawnRand()-- set as the amount of cacti needed
          for i = 1, rows do
                   for j = 1, inRows do
                            table.insert(spawngrid, {x = 50 * i, y = 50 * j})
                   end
          end
 
+         local dice = math.random(#spawngrid)
+
+         local num = 0
          if amount <= maxAmount then
-                  local dice = math.random(#spawngrid)
-                  new_cactus = cactus.new('cactus'..amount, spawngrid[dice].x, spawngrid[dice].y, 45, 45, world)
-                  print(new_cactus.tag)
-                  table.insert(cacti, new_cactus)
-                  
-                  amount = amount + 1
+                  while checkCacti(spawngrid[dice].x, spawngrid[dice].y) == false and num <= #cacti do
+                           num = num + 1
+                           dice = math.random(#spawngrid)
+                  end         
+                  if checkCacti(spawngrid[dice].x, spawngrid[dice].y) then
+                           amount = amount + 1
+                           new_cactus = cactus.new('cactus'..amount, spawngrid[dice].x, spawngrid[dice].y, 45, 45, world)
+                           print(new_cactus.tag)
+                           table.insert(cacti, new_cactus)
+                  end
          end
 end
 
@@ -87,17 +103,3 @@ function cactus:draw()
                   love.graphics.polygon("line", v.physics.body:getWorldPoints(v.physics.shape:getPoints()))
          end
 end
-
---[[
-function cactus:damage(amount)
-         if cactus:checkCollisions(self, player) == true then
-                  
-         end
-end
-
-function cactus:checkCollisions(a, b)
-         if a.x + a.width > b.x and a.x < b.x + b.width and a.y + a.height > b.y and a.y < b.y + b.height then
-                  return true
-         end
-end
-]]

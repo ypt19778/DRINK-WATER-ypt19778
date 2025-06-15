@@ -1,17 +1,18 @@
 -- pre-game must-haves 
 require('audio')
 love.audio.setVolume(1)
-local audio_compatibility_ = love.audio.isEffectsSupported()
-print(audio_compatibility_)
+local system_audio_compatibility_ = love.audio.isEffectsSupported()
+print(system_audio_compatibility_)
+
+-- in-game functionalities
+require('bars')
+require('timer')
+gameover = require('game_over')
 
 -- "living" objects
 require('player')
 require('water')
 require('cactus')
-
--- in-game functionalities
-require('bars')
-gameover = require('game_over')
 
 collisions = ""
 function onCollisionEnter(a, b, contact)
@@ -58,6 +59,9 @@ function love.load()
          t_bar = thirst_bar.new(10, 10, 150, 10, 100)
 
          --format cactus (x, y, width, height, world)
+
+         --format timer (tag, time, color)
+         water_stage_timer = timer.new('water stage timer', 50, {0, 0, 0})
 end
 
 function love.update(dt)
@@ -66,16 +70,26 @@ function love.update(dt)
          if game.state == 'water stage' then
                   p:move()
                   p:update(dt)
+
                   t_bar:update(dt)
-                  t_bar:drain(0.0)
+                  t_bar:drain(0.2)
+
                   cactus:spawnRand()
+
                   water:startSpawn(100)
                   water:update(dt)
+
+                  water_stage_timer:deplete(0.1)
+                  print(water_stage_timer.time)
+                  if water_stage_timer.time <= 0 then
+                           p.physics.body:setPosition(400, 300)
+                           game.state = 'cactus stage'
+                  end
          elseif game.state == 'cactus stage' then
                   p:move()
                   p:update(dt)
                   t_bar:update(dt)
-                  t_bar:drain(0.01)
+                  t_bar:drain(0.05)
                   cactus:spawnMaze()
                   water:update(dt)
          elseif game.state == 'game over' then
@@ -97,11 +111,21 @@ function love.draw()
          if game.state == 'water stage' then
                   --sand color 250, 200, 90
                   love.graphics.setBackgroundColor(250 / 255, 200 / 255, 90 / 255)
+
                   p:draw()
+
                   t_bar:draw()
+
                   cactus:draw()
+
                   water:draw()
+
+                  water_stage_timer:draw()
          elseif game.state == 'cactus stage' then
+                  water:killall()
+                  
+                  love.graphics.setBackgroundColor(0, 0, 0)
+
                   p:draw()
                   t_bar:draw()                   
                   cactus:draw()                  
