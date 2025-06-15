@@ -1,3 +1,8 @@
-# spoilers #
-############
-gamedata_/
+# main gitignore for story #
+############################
+gamedata_
+todo.txt
+
+# beta in-use files #
+#####################
+#none

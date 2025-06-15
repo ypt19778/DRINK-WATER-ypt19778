@@ -3,17 +3,6 @@ waters = {}
 water = {}
 water.__index = water
 
-local rows = 14
-local inRows = 10
-
-local spawngrid = {}
-
-for i = 1, rows do
-         for j = 1, inRows do
-                  table.insert(spawngrid, {x = 50 * i, y = 50 * j})
-         end
-end
-
 function water.new(tag, x, y, width, height)
          local instance = setmetatable({}, water)
          instance.tag = tag
@@ -25,6 +14,7 @@ function water.new(tag, x, y, width, height)
 
          instance.physics = {}
          instance.physics.body = love.physics.newBody(world, instance.x, instance.y, 'static')
+         instance.physics.body:setFixedRotation(true)
          instance.physics.shape = love.physics.newRectangleShape(instance.width / 2, instance.height / 2, instance.width, instance.height)
          instance.physics.fixture = love.physics.newFixture(instance.physics.body, instance.physics.shape)
 
@@ -50,38 +40,92 @@ function water.new(tag, x, y, width, height)
          return instance
 end
 
-timer = 0
-amount = 0
+--this will check the locations of every water on screen
+local function checkWaters(chkX, chkY)
+         --for every water in array waters, do
+                  --if the argument x and y equals any x or y in he array waters then return false and end the function
+         for i, v in ipairs(waters) do
+                  if chkX == v.x and chkY == v.y then
+                           return false
+                  end
+         end
+                  --if said argument is not equal to any x or y in the array waters return true and end the function
+         return true
+end
+
+local timer = 0
+local amount = 0
 function water:startSpawn(rate)
+         local rows = 2
+         local inRows = 2
+
+         local spawngrid = {}
+
+         for i = 1, rows do
+                  for j = 1, inRows do
+                           table.insert(spawngrid, {x = 50 * i, y = 50 * j})
+                  end
+         end
+         
          timer = timer + 1
          if timer > rate then
-                  amount = amount + 1
-
                   local dice = math.random(#spawngrid)
-                  new_water = water.new("water"..amount, spawngrid[dice].x, spawngrid[dice].y, 38, 40)
-                  table.insert(waters, new_water)
+                  num = 0
 
-                  print(new_water.tag.."  ".."x : "..new_water.x..", y : "..new_water.y)
+                  --while the location is occupied and the number of loops is less than the number of waters on screen ( to prevent infinite looping ), do
+                  --(more on num <= waters:)
+                  --if num is greater
+                           --amount of loops = amount of loops plus one ( preventing infinite looping )
+                           --reroll dice ( so next water can spawn )
+                  while checkWaters(spawngrid[dice].x, spawngrid[dice].y) == false and num <= #waters do 
+                           num = num + 1
+                           dice = math.random(#spawngrid)
+                  end
+
+                  --if the location is not occupied then
+                           --spawn and insert newly spawned water into a table
+                  if checkWaters(spawngrid[dice].x, spawngrid[dice].y) then
+                           new_water = water.new("water"..amount, spawngrid[dice].x, spawngrid[dice].y, 38, 40)
+                           table.insert(waters, new_water)
+                  end
+
+                  --reset timer to make waters respawnable
                   timer = 0
          end
 end
 
-function water:pickup(mark)
+function water:pickup(mark, sound)
          table.remove(waters, mark)
          self.physics.fixture:destroy()
-         sounds.drink.one:play()
+         if sound == true then
+                  sounds.drink.one:play()
+         end
 end
 
 function water:update(dt)
-         self.animation.currentFrame = self.animation.currentFrame + self.animation.frameSpeed * dt
-         if self.animation.currentFrame >= 4 then
-                  self.animation.currentFrame = 1
+         for i, v in ipairs(waters) do
+                  if collisions == 'playercolliding'..v.tag then
+                           print('playerpickup'..v.tag)
+                           v:pickup(i, true)
+                           t_bar.capacity = t_bar.capacity + t_bar.full_capacity
+                  elseif collisions == 'watercolliding'..v.tag or collisions == 'cactuscolliding'..v.tag then
+                           print('kill'..v.tag)
+                           v:pickup(i)
+                  end
+                  v.animation.currentFrame = v.animation.currentFrame + v.animation.frameSpeed * dt
+                  if v.animation.currentFrame >= 4 then
+                           v.animation.currentFrame = 1
+                  end
+                  v.x = v.physics.body:getX()
+                  v.y = v.physics.body:getY()
          end
 end
 
 function water:draw()
-         love.graphics.setColor(1, 1, 1, self.alpha)
-         love.graphics.draw(self.animation.spriteSheet, self.animation.frames[math.floor(self.animation.currentFrame)], self.x, self.y, nil, 3)
-         --love.graphics.polygon('line', self.physics.body:getWorldPoints(self.physics.shape:getPoints()))
-         love.graphics.setColor(1, 1, 1)
+         for i, v in ipairs(waters) do
+                  love.graphics.setColor(1, 1, 1, v.alpha)
+                  love.graphics.draw(v.animation.spriteSheet, v.animation.frames[math.floor(v.animation.currentFrame)], v.x, v.y, nil, 3)
+                  love.graphics.polygon('line', v.physics.body:getWorldPoints(v.physics.shape:getPoints()))
+                  love.graphics.setColor(1, 1, 1)
+         end
 end

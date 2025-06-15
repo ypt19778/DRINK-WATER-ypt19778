@@ -69,7 +69,6 @@ end
 
 function player:update(dt)
          self.animation.currentFrame = self.animation.currentFrame + self.animation.frameSpeed * dt
-         print(self.animation.currentFrame)
          if self.animation.currentFrame >= 5 then
                   self.animation.currentFrame = 1
          end
