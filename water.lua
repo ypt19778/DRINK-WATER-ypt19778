@@ -74,7 +74,7 @@ function water:startSpawn(rate)
 
                   --while the location is occupied and the number of loops is less than ( or equal to ) the number of waters, do
                   --(more on num <= waters):
-                  --if num is greater than the number of values in the water array the while loop will stop and move on until a water is removed and a new spot has become open.
+                  --if num is greater than the number of values in the water array the while loop will stop ( so it doesn't crash the game ) and move on until a water is removed and a new spot has become open.
                            --amount of loops = amount of loops plus one ( tracking amount of loops )
                            --reroll dice ( so next water can spawn )
                   while checkWaters(spawngrid[dice].x, spawngrid[dice].y) == false and num <= #waters do

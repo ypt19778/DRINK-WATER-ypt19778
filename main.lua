@@ -13,8 +13,9 @@ gameover = require('game_over')
 require('player')
 require('water')
 require('cactus')
+require('campfire')
 
-collisions = ""
+collisions = "nil"
 function onCollisionEnter(a, b, contact)
          local o1, o2 = a:getUserData(), b:getUserData()
 
@@ -24,7 +25,7 @@ function onCollisionEnter(a, b, contact)
 end
 
 function onCollisionExit(a, b, contact)
-         collisions = ""
+         collisions = "nil"
 end
 
 function love.load()
@@ -38,14 +39,54 @@ function love.load()
                   running: not
                   water stage: play the water minigame
                   cactus stage: play the cactus maze stage
+                  cactus juice stage: play the insanity that is the true cactus phase
                   cutscene(number): play the specified cutscene via cutscene number (0 - 3 are accepted)
                   ]]
-                  state = 'water stage'
+                  state = 'cactus stage'
          }
 
          math.randomseed(os.time())
          love.graphics.setDefaultFilter('nearest', 'nearest')
          audio:init()
+         light_code = [[
+                  #define NUM_LIGHTS 32
+
+                  struct Light {
+                           vec2 position;
+                           vec3 diffuse;
+                           float power;
+                  };
+
+                  extern Light lights[NUM_LIGHTS];
+                  extern int num_lights;
+
+                  extern vec2 screen;
+
+                  const float constant = 1.0;
+                  const float linear = 0.09;
+                  const float quadratic = 0.032;
+
+                  vec4 effect(vec4 color, Image image, vec2 uvs, vec2 screen_coords){
+                           vec4 pixel = Texel(image, uvs);
+
+                           vec2 norm_screen = screen_coords / screen;
+                           vec3 diffuse = vec3(0);
+
+                           for (int i = 0; i < num_lights; i++) {
+                                    Light light = lights[i];
+                                    vec2 norm_pos = light.position / screen;
+
+                                    float distance = length(norm_pos - norm_screen) * light.power;
+                                    float attenuation = 1.0 / (constant + linear * distance + quadratic * (distance * distance));
+                                    diffuse += light.diffuse * attenuation;
+                           }
+
+                           diffuse = clamp(diffuse, 0.0, 1.0);
+
+                           return pixel * vec4(diffuse, 1.0);
+                  }
+         ]]
+         light = love.graphics.newShader(light_code)
 
          world = love.physics.newWorld(0, 0)
          world:setCallbacks(onCollisionEnter, onCollisionExit)
@@ -62,6 +103,20 @@ function love.load()
 
          --format timer (tag, time, color)
          water_stage_timer = timer.new('water stage timer', 50, {0, 0, 0})
+end
+
+local _countReset = true
+local function _resetAvailable()
+         _countReset = true
+end
+local function _reset()
+         if _countReset == true then
+                  water:killall()
+                  cactus:killall()
+                  campfire:killall()
+                  p.physics.body:setPosition(400, 300)
+                  _countReset = false
+         end
 end
 
 function love.update(dt)
@@ -92,6 +147,7 @@ function love.update(dt)
                   t_bar:drain(0.05)
                   cactus:spawnMaze()
                   water:update(dt)
+                  campfire:update(dt)
          elseif game.state == 'game over' then
                   p.speed = 0
                   p.currentFrame = 2
@@ -99,6 +155,7 @@ function love.update(dt)
 end
 
 function love.draw()
+         love.graphics.print(collisions, p.x - 10, p.y - 10)
          for i = 0, 3 do
                   if game.state == "cutscene"..i then
                            if i == 0 then
@@ -122,15 +179,37 @@ function love.draw()
 
                   water_stage_timer:draw()
          elseif game.state == 'cactus stage' then
-                  water:killall()
-                  
                   love.graphics.setBackgroundColor(0, 0, 0)
+                  love.graphics.setShader(light)
+                  light:send("screen", {love.graphics.getWidth(), love.graphics.getHeight()})
+                  light:send('num_lights', 3)
+                  light:send('lights[0].position', {p.x + 15, p.y + 20})
+                  light:send('lights[0].diffuse', {1, 1, 1})
+                  light:send('lights[0].power', 250)
+
+                  light:send('lights[1].position', {new_fire.x + 15 , new_fire.y + 15})
+                  light:send('lights[1].diffuse', {1, 0.5, 0})
+                  light:send('lights[1].power', 450)
+
+                  light:send('lights[2].position', {10, 10})
+                  light:send('lights[2].diffuse', {1, 1, 1})
+                  light:send('lights[2].power', 1)
+
+                  water:killall()
 
                   p:draw()
                   t_bar:draw()                   
                   cactus:draw()                  
                   water:draw()
+                  campfire:draw()
+                  love.graphics.setShader()
          elseif game.state == 'game over' then
+                  light:send("screen", {love.graphics.getWidth(), love.graphics.getHeight()})
+                  light:send('num_lights', 1)
+                  light:send('lights[0].position', {love.graphics.getWidth() / 2, love.graphics.getHeight() / 2})
+                  light:send('lights[0].diffuse', {1, 1, 1})
+                  light:send('lights[0].power', 64)
+
                   gameover:execute("GAME OVER...\n continue?", game.font, 250, 200, 4)
          end
 end
