@@ -1,4 +1,5 @@
 -- pre-game must-haves 
+love.graphics.setDefaultFilter('nearest', 'nearest')
 require('audio')
 love.audio.setVolume(1)
 local system_audio_compatibility_ = love.audio.isEffectsSupported()
@@ -8,6 +9,13 @@ print(system_audio_compatibility_)
 require('bars')
 require('timer')
 gameover = require('game_over')
+
+messageBubble = require('textBubbles')
+local bubble_image_ = love.graphics.newImage('assets/sprites/msgbubble.png')
+local bubble_font_ = love.graphics.newFont('assets/fonts/block.ttf')
+messageBubble:setImage(bubble_image_)
+messageBubble:setColor({0, 0, 0})
+messageBubble:setFont(bubble_font_, 1)
 
 -- "living" objects
 require('player')
@@ -30,9 +38,8 @@ end
 
 function love.load()
          game = {
+                  title = 'nul',
                   font = love.graphics.newFont('assets/fonts/Gameplay.ttf'),
-                  points = 0,
-
                   --all states:
                   --[[
                   game over: the game over screen
@@ -42,11 +49,10 @@ function love.load()
                   cactus juice stage: play the insanity that is the true cactus phase
                   cutscene(number): play the specified cutscene via cutscene number (0 - 3 are accepted)
                   ]]
-                  state = 'cactus stage'
+                  state = 'cutscene0'
          }
 
          math.randomseed(os.time())
-         love.graphics.setDefaultFilter('nearest', 'nearest')
          audio:init()
          light_code = [[
                   #define NUM_LIGHTS 32
@@ -154,14 +160,29 @@ function love.update(dt)
          end
 end
 
+local intro_timer_ = 0
 function love.draw()
+         local mx, my = love.mouse.getPosition()
+
          love.graphics.print(collisions, p.x - 10, p.y - 10)
          for i = 0, 3 do
                   if game.state == "cutscene"..i then
                            if i == 0 then
-                                    print("lv0 test")
+                                    messageBubble:spawn(mx- 20, my - 50, 'Hello!', 3)
+                                    love.graphics.setBackgroundColor(0, 0, 0.2)
+
+                                    intro_timer_ = intro_timer_ + 0.3
+                                    print(intro_timer_)
+
+                                    love.graphics.print('this repository represents...\na game made in LÖVE2D...\n'..game.title..".", 0, 0, nil, 3)
+
+                                    if intro_timer_ > 100 then
+                                             game.state = 'cutscene1'
+                                    end
                            elseif i == 1 then
-                                    print("lv1 test")
+                                    love.graphics.setBackgroundColor(250 / 255, 150 / 255, 50 / 255)
+
+                                    messageBubble:spawn(100, 10, 'Friend:\nNice hike so far!', 5)
                            end
                   end
          end
@@ -191,10 +212,6 @@ function love.draw()
                   light:send('lights[1].diffuse', {1, 0.5, 0})
                   light:send('lights[1].power', 450)
 
-                  light:send('lights[2].position', {10, 10})
-                  light:send('lights[2].diffuse', {1, 1, 1})
-                  light:send('lights[2].power', 1)
-
                   water:killall()
 
                   p:draw()
@@ -212,10 +229,16 @@ function love.draw()
 
                   gameover:execute("GAME OVER...\n continue?", game.font, 250, 200, 4)
          end
+
+         love.graphics.draw(love.graphics.newImage('assets/sprites/ms cursor.png'), mx, my, nil, 3)
+         love.mouse.setVisible(false)
 end
 
 function love.keypressed(k)
          if k == "escape" then
                   love.event.quit()
+         end
+         if k == "enter" and game.state == 'cutscene' then
+
          end
 end

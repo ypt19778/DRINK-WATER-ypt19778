@@ -42,8 +42,12 @@ function player.new(tag, x, y, width, height, speed, world)
          return instance
 end
 
+function player:forceMove(dt, dir, x, y)
+
+end
+
 function player:move()
--- speed tracker         local velX, velY = self.physics.body:getLinearVelocity()
+-- speed tracker local velX, velY = self.physics.body:getLinearVelocity()
          local vectX, vectY = 0, 0
 
          if love.keyboard.isDown('w') then
