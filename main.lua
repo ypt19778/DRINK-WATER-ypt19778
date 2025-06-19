@@ -15,7 +15,7 @@ local bubble_image_ = love.graphics.newImage('assets/sprites/msgbubble.png')
 local bubble_font_ = love.graphics.newFont('assets/fonts/block.ttf')
 messageBubble:setImage(bubble_image_)
 messageBubble:setColor({0, 0, 0})
-messageBubble:setFont(bubble_font_, 1)
+messageBubble:setFont(bubble_font_, 4)
 
 -- "living" objects
 require('player')
@@ -49,7 +49,7 @@ function love.load()
                   cactus juice stage: play the insanity that is the true cactus phase
                   cutscene(number): play the specified cutscene via cutscene number (0 - 3 are accepted)
                   ]]
-                  state = 'cutscene0'
+                  state = 'cutscene1'
          }
 
          math.randomseed(os.time())
@@ -111,20 +111,6 @@ function love.load()
          water_stage_timer = timer.new('water stage timer', 50, {0, 0, 0})
 end
 
-local _countReset = true
-local function _resetAvailable()
-         _countReset = true
-end
-local function _reset()
-         if _countReset == true then
-                  water:killall()
-                  cactus:killall()
-                  campfire:killall()
-                  p.physics.body:setPosition(400, 300)
-                  _countReset = false
-         end
-end
-
 function love.update(dt)
          world:update(dt)
 
@@ -169,12 +155,12 @@ function love.draw()
                   if game.state == "cutscene"..i then
                            if i == 0 then
                                     messageBubble:spawn(mx- 20, my - 50, 'Hello!', 3)
-                                    love.graphics.setBackgroundColor(0, 0, 0.2)
+                                    love.graphics.setBackgroundColor(0, 0, 0)
 
                                     intro_timer_ = intro_timer_ + 0.3
                                     print(intro_timer_)
 
-                                    love.graphics.print('this repository represents...\na game made in LÖVE2D...\n'..game.title..".", 0, 0, nil, 3)
+                                    love.graphics.print('this repository represents...\na game made in LÖVE2D...\n'..game.title..".", 0, 0)
 
                                     if intro_timer_ > 100 then
                                              game.state = 'cutscene1'
@@ -182,7 +168,65 @@ function love.draw()
                            elseif i == 1 then
                                     love.graphics.setBackgroundColor(250 / 255, 150 / 255, 50 / 255)
 
-                                    messageBubble:spawn(100, 10, 'Friend:\nNice hike so far!', 5)
+                                    local grid = {
+                                             {0, 6, 0, 0, 6, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+                                             {8, 7, 9, 8, 7, 9, 7, 7, 7, 7, 7, 7, 7, 7, 7, 7},
+                                             {7, 7, 7, 7, 7, 7, 7, 7, 7, 0, 7, 7, 0, 0, 0, 0},
+                                             {7, 10, 7, 0, 5, 7, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 5, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 4, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 3, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 3, 0, 0, 5, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 4, 0, 0, 4, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {0, 3, 0, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0},
+                                             {1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1},
+                                             {2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2}
+                                    }
+
+                                    -- 1=a, 2=b, 3=c
+                                    local wood = {
+                                             a = love.graphics.newImage('assets/sprites/wood-stump-1.png'),
+                                             b = love.graphics.newImage('assets/sprites/wood-stump-2.png'),
+                                             c = love.graphics.newImage('assets/sprites/wood-stump-3.png')
+                                    }
+                                    local dirt = {
+                                             a = love.graphics.newImage('assets/sprites/dirt-fill.png'),
+                                             b = love.graphics.newImage('assets/sprites/dirt-fill-full.png')
+                                    }
+                                    local leaves = {
+                                             atop = love.graphics.newImage('assets/sprites/branch-slope-up-top.png'),
+                                             bfill = love.graphics.newImage('assets/sprites/branch-slope-up-fill.png'),
+                                             csR = love.graphics.newImage('assets/sprites/branch-slope-up-right.png'),
+                                             csL = love.graphics.newImage('assets/sprites/branch-slope-up-left.png'),
+                                             merge = love.graphics.newImage('assets/sprites/branch-merge-wood.png')
+                                    }
+                                    for index_row, row in ipairs(grid) do
+                                             for index_tile, tile in ipairs(row) do
+                                                      if tile == 1 then
+                                                               love.graphics.draw(dirt.a, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 2 then
+                                                               love.graphics.draw(dirt.b, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 3 then
+                                                               love.graphics.draw(wood.a, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 4 then
+                                                               love.graphics.draw(wood.b, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 5 then
+                                                               love.graphics.draw(wood.c, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 6 then
+                                                               love.graphics.draw(leaves.atop, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 7 then
+                                                               love.graphics.draw(leaves.bfill, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 8 then
+                                                               love.graphics.draw(leaves.csR, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 9 then
+                                                               love.graphics.draw(leaves.csL, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      elseif tile == 10 then
+                                                               love.graphics.draw(leaves.merge, index_tile * 50 - 50, index_row * 50 - 50, nil, 5)
+                                                      end
+                                             end
+                                    end
+
+                                    messageBubble:spawn(100, 10, 'Friend:\nNice hike so far!', 7)
                            end
                   end
          end
