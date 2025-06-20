@@ -10,7 +10,6 @@ function thirst_bar.new(x, y, width, height, capacity)
 
          instance.full_capacity = capacity
          instance.capacity = capacity + (width / 2)
-         instance.extra_capacity = 0
          return instance
 end
 
@@ -19,6 +18,8 @@ function thirst_bar:drain(rate)
 end
 
 function thirst_bar:update(dt)
+         self.x = p.x - 25
+         self.y = p.y + 50
          if self.capacity <= 0 then
                   game.state = 'game over'
                   self.capacity = 0

@@ -1,5 +1,5 @@
 function love.conf(t)
-         t.title = 'DRINK WATER I'
+         t.title = 'fun hiking game'
          t.window.fullscreen = false
-         t.console = true
+         t.console = false
 end

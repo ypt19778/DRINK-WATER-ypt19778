@@ -1,15 +1,1 @@
-# main gitignore for story #
-############################
-gamedata_
-
-# beta files #
-#####################
-#nil
-
-# devs only #
-#############
-todo.txt
-
-#%% SAVEDATA %%#
-##################
-#nil
+gamedata_s

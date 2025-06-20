@@ -100,7 +100,7 @@ function water:pickup(mark, sound)
          table.remove(waters, mark)
          self.physics.fixture:destroy()
          if sound == true then
-                  sounds.drink.one:play()
+                  --sounds.drink.one:play()
          end
 end
 
@@ -108,7 +108,7 @@ function water:update(dt)
          for i, v in ipairs(waters) do
                   if collisions == 'playercolliding'..v.tag then
                            v:pickup(i, true)
-                           t_bar.capacity = t_bar.capacity + t_bar.full_capacity
+                           t_bar.capacity = t_bar.capacity + (t_bar.full_capacity - t_bar.capacity)
                   end
           
                   v.animation.currentFrame = v.animation.currentFrame + v.animation.frameSpeed * dt
@@ -123,7 +123,7 @@ end
 function water:draw()
          for i, v in ipairs(waters) do
                   love.graphics.draw(v.animation.spriteSheet, v.animation.frames[math.floor(v.animation.currentFrame)], v.x, v.y, nil, 3)
-                  love.graphics.polygon('line', v.physics.body:getWorldPoints(v.physics.shape:getPoints()))
+                  --love.graphics.polygon('line', v.physics.body:getWorldPoints(v.physics.shape:getPoints()))
          end
 end
 
@@ -133,4 +133,13 @@ function water:killall()
                   waters[i] = nil
                   waters = {}
          end
+end
+
+function water:checkCollisions(a)
+         for i, v in ipairs(waters) do
+                  if a.x + a.width > v.x and a.x < v.x + v.width and a.y + a.height > v.y and a.y < v.y + v.height then
+                           return true
+                  end
+         end
+         return false   
 end

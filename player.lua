@@ -13,6 +13,7 @@ function player.new(tag, x, y, width, height, speed, world)
 
          instance.physics = {}
          instance.physics.body = love.physics.newBody(world, instance.x, instance.y, 'dynamic')
+         instance.physics.body:setMass(0.001)
          instance.physics.shape = love.physics.newRectangleShape(instance.width / 2, instance.height / 2, instance.width, instance.height)
          instance.physics.fixture = love.physics.newFixture(instance.physics.body, instance.physics.shape)
          instance.physics.body:setFixedRotation(true)
@@ -20,7 +21,7 @@ function player.new(tag, x, y, width, height, speed, world)
          instance.physics.fixture:setUserData(instance)
 
          instance.animation = {
-                  frameSpeed = 3,
+                  frameSpeed = 5,
                   currentFrame = 1,
                   idle = love.graphics.newImage('assets/sprites/player-idle-anim.png'),
                   left = love.graphics.newImage('assets/sprites/player-left-anim.png'),
@@ -50,6 +51,7 @@ function player:move()
 -- speed tracker local velX, velY = self.physics.body:getLinearVelocity()
          local vectX, vectY = 0, 0
 
+         local dice = math.random(1, 3)
          if love.keyboard.isDown('w') then
                   vectY = -self.speed
                   self.animation.currentAnimation = self.animation.up

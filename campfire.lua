@@ -53,10 +53,10 @@ end
 function campfire:update(dt)
          for i, v in ipairs(campfires) do
                   if collisions == 'playercolliding'..v.tag then
-                           game.state = 'cactus juice stage'
-                           cactus:killall()
+                           bush:killall()
                            campfire:killall()
                            t_bar.capacity = t_bar.capacity + t_bar.full_capacity
+                           game.state = 'cutscene3'
                   end
 
                   v.psystem:update(dt)

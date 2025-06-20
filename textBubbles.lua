@@ -31,7 +31,7 @@ end
 
 function M:spawn(x, y, text, size)
          if M.sprite and M.color then
-                  love.graphics.draw(M.sprite, x, y, nil, size * 2, size * 2)
+                  love.graphics.draw(M.sprite, x, y, nil, size * 2.5, size * 2)
                   love.graphics.setColor(M.color)
                   --[[
                   if M.font then
@@ -41,7 +41,7 @@ function M:spawn(x, y, text, size)
                   end
                   ]]
                   if M.font then
-                           love.graphics.printf(tostring(text), M.font, x + (5 * size), y + (5 * (size / 1.2)), size * 30, "left", nil, M.fontSize)
+                           love.graphics.printf(tostring(text), M.font, x + (5 * (size * 1.3)), y + (5 * (size / 1.2)), size * 30, "left", nil, M.font_scale, M.font_scale / 1.2)
                   else
                            love.graphics.printf(tostring(text), x, y, size * 30, "left", nil, size)
                   end
