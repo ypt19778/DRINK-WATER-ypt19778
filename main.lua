@@ -189,7 +189,7 @@ function love.update(dt)
                   water:update(dt)
                   campfire:update(dt)
          elseif game.state == 'cactus juice stage p1' then     
-                  if event ~= 1 then    
+                  if event ~= 1 then
                            p.physics.body:setPosition(400, 300)
                            bush:availablerand()
                            bush:spawnRand()
