@@ -126,7 +126,7 @@ function love.update(dt)
          world:update(dt)
          cam:lookAt(p.x, p.y)
 
-         for i = 0, 5 do
+         for i = 0, 5 do 
                   if game.state == 'cutscene'..i then
                            if i == 1 then
                                     for i, v in ipairs(props) do
@@ -184,8 +184,6 @@ function love.update(dt)
                   bush:spawnMaze()
                   p:move()
                   p:update(dt)
-                  t_bar:update(dt)
-                  t_bar:drain(0.05)
                   water:update(dt)
                   campfire:update(dt)
          elseif game.state == 'cactus juice stage p1' then     
@@ -546,6 +544,7 @@ function love.draw()
                                     if msg_ > #messages then
                                              game.state = 'the end'
                                     end
+
                                     -- opt pictures of the hike shown at credits screen
                                     -- The end... cutscene not made yet.
                            end
@@ -595,8 +594,7 @@ function love.draw()
                            light:send('lights[1].power', 450)
                   end
 
-                  love.graphics.setShader()
-                  t_bar:draw()  
+                  love.graphics.setShader()  
          elseif game.state == 'cactus juice stage p1' then
                   love.graphics.setBackgroundColor(180 / 255, 100 / 255, 0)
 
@@ -624,6 +622,8 @@ function love.draw()
                   prop:killall()
                   love.graphics.setBackgroundColor(0, 0, 0.1)
                   love.graphics.print("THE END", 300, 200, nil, 5)
+                  love.graphics.print('press "r" to restart.', 400, 400, nil, 2)
+                  if love.keyboard.isDown('r') then love.event.quit('restart') end
          end
 
          love.graphics.draw(love.graphics.newImage('assets/sprites/ms cursor.png'), mx, my, nil, 3)
